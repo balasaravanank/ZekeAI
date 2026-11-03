@@ -92,11 +92,10 @@ export function Chat({ token, onLogout }: ChatProps) {
   const handleMicToggle = useCallback(() => {
     if (capture.capturing) {
       capture.stop()
-    } else {
-      if (state === 'speaking') {
-        playback.stop()
-        ws.sendInterrupt()
-      }
+    } else if (state === 'speaking') {
+      playback.stop()
+      ws.sendInterrupt()
+    } else if (state === 'idle') {
       capture.start()
     }
   }, [capture, state, playback, ws])
@@ -112,8 +111,8 @@ export function Chat({ token, onLogout }: ChatProps) {
   return (
     <div className="h-screen bg-zeke-canvas flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 bg-zeke-surface border-b border-zeke-border shrink-0">
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 bg-zeke-surface border-b border-zeke-border shrink-0">
+        <div className="flex items-center gap-2 md:gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-zeke-muted hover:text-zeke-text transition-colors p-1"
@@ -123,10 +122,10 @@ export function Chat({ token, onLogout }: ChatProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-base font-semibold text-zeke-text">Zeke</h1>
+          <h1 className="text-sm md:text-base font-semibold text-zeke-text">Zeke</h1>
           <StatusIndicator state={state} connected={ws.connected} />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <button
             onClick={() => setSettingsOpen(true)}
             className="text-zeke-muted hover:text-zeke-text transition-colors p-1"
@@ -139,7 +138,7 @@ export function Chat({ token, onLogout }: ChatProps) {
           </button>
           <button
             onClick={onLogout}
-            className="text-xs text-zeke-muted hover:text-zeke-text transition-colors font-medium"
+            className="text-[11px] md:text-xs text-zeke-muted hover:text-zeke-text transition-colors font-medium"
           >
             Sign out
           </button>
@@ -147,14 +146,14 @@ export function Chat({ token, onLogout }: ChatProps) {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto space-y-3">
-          {messages.length === 0 && !pendingAssistant && (
-            <div className="text-center py-16">
-              <div className="text-4xl mb-4">👋</div>
-              <p className="text-zeke-text font-medium mb-1">Hey, I'm Zeke</p>
-              <p className="text-sm text-zeke-muted">
-                Tap the mic and start talking, or type a message below.
+      <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4 md:py-6">
+        <div className="max-w-2xl mx-auto space-y-2.5 md:space-y-3">
+          {messages.length === 0 && !pendingAssistant && state === 'idle' && (
+            <div className="text-center py-12 md:py-16">
+              <div className="text-3xl md:text-4xl mb-3 md:mb-4">👋</div>
+              <p className="text-zeke-text font-medium text-sm md:text-base mb-1">Hey, I'm Zeke</p>
+              <p className="text-xs md:text-sm text-zeke-muted">
+                Tap the mic and start talking, or type below.
               </p>
             </div>
           )}
@@ -179,16 +178,14 @@ export function Chat({ token, onLogout }: ChatProps) {
       </div>
 
       {/* Voice + Input area */}
-      <div className="shrink-0 bg-zeke-surface border-t border-zeke-border px-4 py-5">
-        <div className="max-w-2xl mx-auto flex flex-col items-center gap-4">
-          {/* Mic button */}
+      <div className="shrink-0 bg-zeke-surface border-t border-zeke-border px-3 md:px-4 py-3 md:py-4">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-3">
           <VoiceButton
             state={state}
             capturing={capture.capturing}
             onClick={handleMicToggle}
           />
 
-          {/* Text input */}
           <form onSubmit={handleTextSubmit} className="w-full">
             <div className="flex gap-2">
               <input
@@ -196,14 +193,14 @@ export function Chat({ token, onLogout }: ChatProps) {
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="Or type a message..."
-                className="flex-1 px-4 py-2.5 rounded-xl bg-zeke-canvas border border-zeke-border
+                className="flex-1 px-3 md:px-4 py-2 md:py-2.5 rounded-xl bg-zeke-canvas border border-zeke-border
                   text-sm text-zeke-text placeholder-zeke-muted
                   focus:outline-none focus:border-zeke-accent focus:ring-1 focus:ring-zeke-accent transition-colors"
               />
               <button
                 type="submit"
                 disabled={!textInput.trim()}
-                className="px-4 py-2.5 rounded-xl bg-zeke-accent text-white text-sm font-medium
+                className="px-3 md:px-4 py-2 md:py-2.5 rounded-xl bg-zeke-accent text-white text-sm font-medium
                   hover:bg-zeke-accent/90 transition-colors
                   disabled:opacity-30 disabled:cursor-not-allowed"
               >
@@ -214,7 +211,6 @@ export function Chat({ token, onLogout }: ChatProps) {
         </div>
       </div>
 
-      {/* Sidebar */}
       <ConversationSidebar
         currentId={conversationId}
         onSelect={(id) => {
@@ -229,7 +225,6 @@ export function Chat({ token, onLogout }: ChatProps) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Settings */}
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   )

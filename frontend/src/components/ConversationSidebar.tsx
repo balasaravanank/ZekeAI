@@ -32,8 +32,8 @@ export function ConversationSidebar({
   return (
     <div className="fixed inset-0 z-40 flex">
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-      <div className="relative w-72 bg-zeke-surface border-r border-zeke-border h-full flex flex-col shadow-lg">
-        <div className="flex items-center justify-between p-4 border-b border-zeke-border">
+      <div className="relative w-full max-w-[280px] bg-zeke-surface border-r border-zeke-border h-full flex flex-col shadow-lg">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b border-zeke-border">
           <span className="text-sm font-medium text-zeke-text">Conversations</span>
           <button
             onClick={onNew}
@@ -49,15 +49,15 @@ export function ConversationSidebar({
               key={conv.id}
               onClick={() => onSelect(conv.id)}
               className={`
-                w-full text-left px-4 py-3 text-sm border-b border-zeke-border/50
+                w-full text-left px-3 md:px-4 py-2.5 md:py-3 text-sm border-b border-zeke-border/50
                 transition-colors hover:bg-zeke-canvas
-                ${conv.id === currentId ? 'bg-zeke-accent-light text-zeke-text' : 'text-zeke-muted'}
+                ${conv.id === currentId ? 'bg-zeke-accent-light' : ''}
               `}
             >
-              <div className="truncate text-zeke-text">
+              <div className="truncate text-zeke-text text-sm">
                 {conv.title || 'New conversation'}
               </div>
-              <div className="text-xs text-zeke-muted mt-0.5">
+              <div className="text-[11px] text-zeke-muted mt-0.5">
                 {new Date(conv.updated_at).toLocaleDateString()}
               </div>
             </button>

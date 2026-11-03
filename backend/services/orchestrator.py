@@ -58,7 +58,7 @@ class ConversationOrchestrator:
                 pass
         self._cancelled = False
         self.vad.reset()
-        await self._send_json(status_msg(ConversationState.LISTENING))
+        await self._send_json(status_msg(ConversationState.IDLE))
 
     async def _process_turn(self, audio_bytes: bytes) -> None:
         if self._processing:
@@ -72,7 +72,7 @@ class ConversationOrchestrator:
             text = await asyncio.to_thread(stt.transcribe, audio_bytes)
 
             if not text or not text.strip():
-                await self._send_json(status_msg(ConversationState.LISTENING))
+                await self._send_json(status_msg(ConversationState.IDLE))
                 return
 
             await self._send_json(user_text_msg(text))
@@ -86,7 +86,7 @@ class ConversationOrchestrator:
         finally:
             self._processing = False
             if not self._cancelled:
-                await self._send_json(status_msg(ConversationState.LISTENING))
+                await self._send_json(status_msg(ConversationState.IDLE))
 
     async def _process_text_turn(self, text: str) -> None:
         if self._processing:
@@ -105,7 +105,7 @@ class ConversationOrchestrator:
         finally:
             self._processing = False
             if not self._cancelled:
-                await self._send_json(status_msg(ConversationState.LISTENING))
+                await self._send_json(status_msg(ConversationState.IDLE))
 
     async def _generate_response(self, user_text: str) -> None:
         await conversation_store.add_message(

@@ -11,14 +11,15 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
   const isProcessing = state === 'transcribing'
   const isThinking = state === 'thinking'
   const isSpeaking = state === 'speaking'
+  const isBusy = isProcessing || isThinking || isSpeaking
 
   let label = 'Tap to speak'
   let bgClass = 'bg-white border-2 border-zeke-accent'
   let iconColor = 'text-zeke-accent'
 
   if (isRecording) {
-    label = 'Listening... tap to stop'
-    bgClass = 'bg-zeke-recording'
+    label = 'Tap to stop'
+    bgClass = 'bg-zeke-recording border-2 border-zeke-recording'
     iconColor = 'text-white'
   } else if (isProcessing) {
     label = 'Processing...'
@@ -29,15 +30,14 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
     bgClass = 'bg-white border-2 border-zeke-thinking'
     iconColor = 'text-zeke-thinking'
   } else if (isSpeaking) {
-    label = 'Speaking... tap to interrupt'
+    label = 'Tap to interrupt'
     bgClass = 'bg-white border-2 border-zeke-accent'
     iconColor = 'text-zeke-accent'
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-2">
       <div className="relative">
-        {/* Ripple ring when recording */}
         {isRecording && (
           <>
             <span
@@ -51,7 +51,6 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
           </>
         )}
 
-        {/* Thinking glow */}
         {isThinking && (
           <span
             className="absolute inset-0 rounded-full"
@@ -59,7 +58,6 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
           />
         )}
 
-        {/* Processing spinner */}
         {isProcessing && (
           <span
             className="absolute -inset-1 rounded-full border-2 border-transparent border-t-zeke-accent"
@@ -68,14 +66,16 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
         )}
 
         <button
-          onClick={onClick}
+          onClick={isBusy && !isSpeaking ? undefined : onClick}
+          disabled={isProcessing || isThinking}
           className={`
-            relative w-[72px] h-[72px] rounded-full
+            relative w-16 h-16 md:w-[72px] md:h-[72px] rounded-full
             ${bgClass}
             flex items-center justify-center
             transition-all duration-200
             shadow-sm hover:shadow-md active:scale-95
             focus:outline-none focus-visible:ring-2 focus-visible:ring-zeke-accent focus-visible:ring-offset-2
+            disabled:cursor-wait disabled:active:scale-100
           `}
           aria-label={label}
         >
@@ -86,7 +86,7 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
                   key={i}
                   className="w-[3px] rounded-full bg-zeke-accent"
                   style={{
-                    height: '20px',
+                    height: '18px',
                     animation: `bar-bounce 0.6s ease-in-out ${i * 0.1}s infinite`,
                     transformOrigin: 'center',
                   }}
@@ -95,7 +95,7 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
             </div>
           ) : (
             <svg
-              className={`w-7 h-7 ${iconColor} transition-colors`}
+              className={`w-6 h-6 md:w-7 md:h-7 ${iconColor} transition-colors`}
               fill="currentColor"
               viewBox="0 0 24 24"
             >
@@ -106,7 +106,7 @@ export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
         </button>
       </div>
 
-      <span className="text-xs text-zeke-muted font-medium tracking-wide">
+      <span className="text-[11px] md:text-xs text-zeke-muted font-medium">
         {label}
       </span>
     </div>

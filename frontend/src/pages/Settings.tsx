@@ -39,14 +39,14 @@ export function Settings({ open, onClose }: SettingsProps) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-      <div className="relative bg-zeke-surface border border-zeke-border rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-lg">
-        <div className="flex items-center justify-between p-4 border-b border-zeke-border">
+      <div className="relative bg-zeke-surface border border-zeke-border rounded-t-2xl md:rounded-2xl w-full md:max-w-md max-h-[85vh] md:max-h-[80vh] flex flex-col shadow-lg">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b border-zeke-border">
           <div className="flex gap-1 bg-zeke-canvas rounded-lg p-0.5">
             <button
               onClick={() => setTab('settings')}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs md:text-sm rounded-md transition-colors ${
                 tab === 'settings' ? 'bg-zeke-surface text-zeke-text shadow-sm font-medium' : 'text-zeke-muted'
               }`}
             >
@@ -54,7 +54,7 @@ export function Settings({ open, onClose }: SettingsProps) {
             </button>
             <button
               onClick={() => setTab('memories')}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs md:text-sm rounded-md transition-colors ${
                 tab === 'memories' ? 'bg-zeke-surface text-zeke-text shadow-sm font-medium' : 'text-zeke-muted'
               }`}
             >
@@ -66,9 +66,9 @@ export function Settings({ open, onClose }: SettingsProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-3 md:p-4">
           {tab === 'settings' && (
-            <div className="space-y-5">
+            <div className="space-y-4 md:space-y-5">
               <label className="flex items-center justify-between">
                 <span className="text-sm text-zeke-text">Voice responses</span>
                 <input

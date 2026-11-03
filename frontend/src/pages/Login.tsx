@@ -26,12 +26,12 @@ export function Login({ onLogin }: LoginProps) {
   return (
     <div className="min-h-screen bg-zeke-canvas flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-zeke-text tracking-tight">Zeke</h1>
-          <p className="text-sm text-zeke-muted mt-1.5">Your voice assistant</p>
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-semibold text-zeke-text tracking-tight">Zeke</h1>
+          <p className="text-xs md:text-sm text-zeke-muted mt-1">Your voice assistant</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-zeke-surface rounded-2xl border border-zeke-border p-6 space-y-4 shadow-sm">
+        <form onSubmit={handleSubmit} className="bg-zeke-surface rounded-2xl border border-zeke-border p-5 md:p-6 space-y-3 md:space-y-4 shadow-sm">
           <div>
             <input
               type="text"
@@ -40,7 +40,7 @@ export function Login({ onLogin }: LoginProps) {
               placeholder="Username"
               autoFocus
               required
-              className="w-full px-4 py-3 rounded-xl bg-zeke-canvas border border-zeke-border
+              className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-zeke-canvas border border-zeke-border
                 text-zeke-text placeholder-zeke-muted text-sm
                 focus:outline-none focus:border-zeke-accent focus:ring-1 focus:ring-zeke-accent transition-colors"
             />
@@ -52,20 +52,18 @@ export function Login({ onLogin }: LoginProps) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full px-4 py-3 rounded-xl bg-zeke-canvas border border-zeke-border
+              className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-zeke-canvas border border-zeke-border
                 text-zeke-text placeholder-zeke-muted text-sm
                 focus:outline-none focus:border-zeke-accent focus:ring-1 focus:ring-zeke-accent transition-colors"
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-zeke-recording">{error}</p>
-          )}
+          {error && <p className="text-sm text-zeke-recording">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-zeke-accent text-white text-sm font-medium
+            className="w-full py-2.5 md:py-3 rounded-xl bg-zeke-accent text-white text-sm font-medium
               hover:bg-zeke-accent/90 transition-colors
               disabled:opacity-50 disabled:cursor-not-allowed"
           >
