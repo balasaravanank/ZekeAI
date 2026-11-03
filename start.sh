@@ -6,7 +6,7 @@ set -euo pipefail
 # Starts llama-server and the FastAPI application
 # =============================================================================
 
-ZEKE_HOME="${ZEKE_BASE_DIR:-/workspace/zeke-ai}"
+ZEKE_HOME="${ZEKE_BASE_DIR:-$HOME/zeke-ai}"
 cd "$ZEKE_HOME"
 
 # Load environment

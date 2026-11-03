@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     users_json: str = '{}'
 
     # --- Paths ---
-    base_dir: Path = Path("/workspace/zeke-ai")
-    models_dir: Path = Path("/workspace/zeke-ai/models")
-    data_dir: Path = Path("/workspace/zeke-ai/data")
+    base_dir: Path = Path.home() / "zeke-ai"
+    models_dir: Path = Path.home() / "zeke-ai" / "models"
+    data_dir: Path = Path.home() / "zeke-ai" / "data"
 
     # --- STT ---
     whisper_model: str = "ggml-base.en.bin"

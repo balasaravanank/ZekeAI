@@ -20,8 +20,8 @@ Self-hosted voice assistant. All inference runs locally — no cloud APIs.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/zeke-ai.git /workspace/zeke-ai
-cd /workspace/zeke-ai
+git clone https://github.com/balasaravanank/ZekeAI.git ~/zeke-ai
+cd ~/zeke-ai
 
 # 2. Copy and edit environment config
 cp .env.example .env
@@ -56,8 +56,8 @@ ZEKE_USERS_JSON={"alice": "$2b$12$...", "bob": "$2b$12$..."}
 ```bash
 npx instabox@latest sh
 # Inside the container:
-git clone https://github.com/yourusername/zeke-ai.git /workspace/zeke-ai
-cd /workspace/zeke-ai
+git clone https://github.com/balasaravanank/ZekeAI.git ~/zeke-ai
+cd ~/zeke-ai
 cp .env.example .env
 # Edit .env
 ./bootstrap.sh

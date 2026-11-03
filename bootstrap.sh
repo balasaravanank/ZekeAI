@@ -6,7 +6,7 @@ set -euo pipefail
 # Provisions a bare Instabox container into a fully operational Zeke AI instance
 # =============================================================================
 
-ZEKE_HOME="${ZEKE_BASE_DIR:-/workspace/zeke-ai}"
+ZEKE_HOME="${ZEKE_BASE_DIR:-$HOME/zeke-ai}"
 MODELS_DIR="${ZEKE_MODELS_DIR:-$ZEKE_HOME/models}"
 DATA_DIR="${ZEKE_DATA_DIR:-$ZEKE_HOME/data}"
 
