@@ -5,10 +5,10 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
+import bcrypt as _bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from passlib.hash import bcrypt
 from pydantic import BaseModel
 
 from backend.config.constants import LOGIN_RATE_LIMIT
@@ -82,7 +82,16 @@ async def login(request: Request, body: LoginRequest) -> LoginResponse:
         raise HTTPException(status_code=503, detail="No users configured")
 
     stored_hash = users.get(body.username)
-    if not stored_hash or not bcrypt.verify(body.password, stored_hash):
+    if not stored_hash:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    try:
+        password_ok = _bcrypt.checkpw(
+            body.password.encode("utf-8"),
+            stored_hash.encode("utf-8"),
+        )
+    except Exception:
+        password_ok = False
+    if not password_ok:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token, expires = _create_token(body.username)
