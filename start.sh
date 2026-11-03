@@ -9,11 +9,15 @@ set -eo pipefail
 ZEKE_HOME="${ZEKE_BASE_DIR:-$HOME/zeke-ai}"
 cd "$ZEKE_HOME"
 
-# Load environment (without nounset — .env values may contain $)
+# Load environment safely (values may contain $ from bcrypt hashes)
 if [ -f .env ]; then
-    set -a
-    source .env
-    set +a
+    while IFS='=' read -r key value; do
+        # Skip comments and empty lines
+        [[ "$key" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "$key" ]] && continue
+        key=$(echo "$key" | xargs)
+        export "$key"="$value"
+    done < .env
 fi
 
 source venv/bin/activate
