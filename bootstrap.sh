@@ -56,12 +56,12 @@ pip install --no-cache-dir -q -r backend/requirements.txt
 echo "  Done."
 
 # --- 4. Build frontend ---
-echo "[4/7] Building frontend..."
+echo "[4/8] Building frontend..."
 cd "$ZEKE_HOME/frontend"
 if [ ! -d "node_modules" ]; then
-    npm ci --silent
+    npm install --silent
 fi
-npm run build --silent
+npx tsc -b && npx vite build
 cd "$ZEKE_HOME"
 echo "  Done."
 
