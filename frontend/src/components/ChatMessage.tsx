@@ -1,4 +1,4 @@
-import { ChatMessage as ChatMessageType } from '../types/protocol'
+import type { ChatMessage as ChatMessageType } from '../types/protocol'
 
 interface ChatMessageProps {
   message: ChatMessageType
@@ -11,10 +11,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`
-          max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed
+          max-w-[80%] px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed
           ${isUser
-            ? 'bg-zeke-accent/10 text-zeke-text rounded-br-md'
-            : 'bg-zeke-surface text-zeke-text rounded-bl-md'
+            ? 'bg-zeke-accent text-white rounded-br-md'
+            : 'bg-zeke-surface text-zeke-text border border-zeke-border rounded-bl-md'
           }
         `}
       >

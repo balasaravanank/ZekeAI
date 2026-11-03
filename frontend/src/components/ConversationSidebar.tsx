@@ -31,18 +31,15 @@ export function ConversationSidebar({
 
   return (
     <div className="fixed inset-0 z-40 flex">
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative w-72 bg-zeke-bg border-r border-zeke-border h-full flex flex-col">
+      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div className="relative w-72 bg-zeke-surface border-r border-zeke-border h-full flex flex-col shadow-lg">
         <div className="flex items-center justify-between p-4 border-b border-zeke-border">
           <span className="text-sm font-medium text-zeke-text">Conversations</span>
           <button
             onClick={onNew}
-            className="text-xs text-zeke-accent hover:text-zeke-text transition-colors"
+            className="text-xs text-zeke-accent hover:text-zeke-accent/80 font-medium transition-colors"
           >
-            New
+            New chat
           </button>
         </div>
 
@@ -53,21 +50,21 @@ export function ConversationSidebar({
               onClick={() => onSelect(conv.id)}
               className={`
                 w-full text-left px-4 py-3 text-sm border-b border-zeke-border/50
-                transition-colors hover:bg-zeke-surface
-                ${conv.id === currentId ? 'bg-zeke-surface text-zeke-text' : 'text-zeke-muted'}
+                transition-colors hover:bg-zeke-canvas
+                ${conv.id === currentId ? 'bg-zeke-accent-light text-zeke-text' : 'text-zeke-muted'}
               `}
             >
-              <div className="truncate">
+              <div className="truncate text-zeke-text">
                 {conv.title || 'New conversation'}
               </div>
-              <div className="text-xs text-zeke-muted-2 mt-0.5">
+              <div className="text-xs text-zeke-muted mt-0.5">
                 {new Date(conv.updated_at).toLocaleDateString()}
               </div>
             </button>
           ))}
 
           {conversations.length === 0 && (
-            <div className="p-4 text-sm text-zeke-muted-2 text-center">
+            <div className="p-4 text-sm text-zeke-muted text-center">
               No conversations yet
             </div>
           )}

@@ -40,24 +40,28 @@ export function Settings({ open, onClose }: SettingsProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-zeke-bg border border-zeke-border rounded-xl w-full max-w-md max-h-[80vh] flex flex-col">
+      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div className="relative bg-zeke-surface border border-zeke-border rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-lg">
         <div className="flex items-center justify-between p-4 border-b border-zeke-border">
-          <div className="flex gap-4">
+          <div className="flex gap-1 bg-zeke-canvas rounded-lg p-0.5">
             <button
               onClick={() => setTab('settings')}
-              className={`text-sm ${tab === 'settings' ? 'text-zeke-text' : 'text-zeke-muted'}`}
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                tab === 'settings' ? 'bg-zeke-surface text-zeke-text shadow-sm font-medium' : 'text-zeke-muted'
+              }`}
             >
               Settings
             </button>
             <button
               onClick={() => setTab('memories')}
-              className={`text-sm ${tab === 'memories' ? 'text-zeke-text' : 'text-zeke-muted'}`}
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                tab === 'memories' ? 'bg-zeke-surface text-zeke-text shadow-sm font-medium' : 'text-zeke-muted'
+              }`}
             >
               Memories
             </button>
           </div>
-          <button onClick={onClose} className="text-zeke-muted hover:text-zeke-text text-lg">
+          <button onClick={onClose} className="text-zeke-muted hover:text-zeke-text text-lg leading-none p-1">
             ×
           </button>
         </div>
@@ -71,12 +75,15 @@ export function Settings({ open, onClose }: SettingsProps) {
                   type="checkbox"
                   checked={settings.tts_enabled}
                   onChange={(e) => setSettings({ ...settings, tts_enabled: e.target.checked })}
-                  className="accent-zeke-accent"
+                  className="accent-zeke-accent w-4 h-4"
                 />
               </label>
 
               <div>
-                <label className="text-sm text-zeke-text block mb-1.5">Temperature</label>
+                <div className="flex justify-between mb-1.5">
+                  <label className="text-sm text-zeke-text">Temperature</label>
+                  <span className="text-xs text-zeke-muted">{settings.llm_temperature}</span>
+                </div>
                 <input
                   type="range"
                   min="0.1"
@@ -86,11 +93,13 @@ export function Settings({ open, onClose }: SettingsProps) {
                   onChange={(e) => setSettings({ ...settings, llm_temperature: parseFloat(e.target.value) })}
                   className="w-full accent-zeke-accent"
                 />
-                <span className="text-xs text-zeke-muted">{settings.llm_temperature}</span>
               </div>
 
               <div>
-                <label className="text-sm text-zeke-text block mb-1.5">Max response length</label>
+                <div className="flex justify-between mb-1.5">
+                  <label className="text-sm text-zeke-text">Max response length</label>
+                  <span className="text-xs text-zeke-muted">{settings.llm_max_tokens} tokens</span>
+                </div>
                 <input
                   type="range"
                   min="64"
@@ -100,14 +109,13 @@ export function Settings({ open, onClose }: SettingsProps) {
                   onChange={(e) => setSettings({ ...settings, llm_max_tokens: parseInt(e.target.value) })}
                   className="w-full accent-zeke-accent"
                 />
-                <span className="text-xs text-zeke-muted">{settings.llm_max_tokens} tokens</span>
               </div>
 
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
-                className="w-full py-2 rounded-lg bg-zeke-accent/10 text-zeke-accent text-sm
-                  hover:bg-zeke-accent/20 transition-colors disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-zeke-accent text-white text-sm font-medium
+                  hover:bg-zeke-accent/90 transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save settings'}
               </button>
@@ -117,14 +125,14 @@ export function Settings({ open, onClose }: SettingsProps) {
           {tab === 'memories' && (
             <div className="space-y-2">
               {memories.length === 0 && (
-                <p className="text-sm text-zeke-muted-2 text-center py-8">
+                <p className="text-sm text-zeke-muted text-center py-8">
                   No memories yet. Zeke learns about you as you talk.
                 </p>
               )}
               {memories.map((mem) => (
                 <div
                   key={mem.id}
-                  className="flex items-start justify-between gap-2 p-3 rounded-lg bg-zeke-surface"
+                  className="flex items-start justify-between gap-2 p-3 rounded-xl bg-zeke-canvas border border-zeke-border"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-xs text-zeke-muted">{mem.key}</div>
@@ -132,9 +140,9 @@ export function Settings({ open, onClose }: SettingsProps) {
                   </div>
                   <button
                     onClick={() => handleDeleteMemory(mem.id)}
-                    className="text-zeke-muted-2 hover:text-red-400 text-xs shrink-0"
+                    className="text-zeke-muted hover:text-zeke-recording text-xs shrink-0 transition-colors"
                   >
-                    Delete
+                    Remove
                   </button>
                 </div>
               ))}

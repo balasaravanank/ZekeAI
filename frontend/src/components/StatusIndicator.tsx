@@ -1,4 +1,4 @@
-import { ConversationState } from '../types/protocol'
+import type { ConversationState } from '../types/protocol'
 
 interface StatusIndicatorProps {
   state: ConversationState
@@ -16,10 +16,10 @@ export function StatusIndicator({ state, connected }: StatusIndicatorProps) {
   }
 
   const config: Record<ConversationState, { color: string; text: string }> = {
-    idle: { color: 'bg-zeke-muted-2', text: 'Ready' },
-    listening: { color: 'bg-zeke-accent', text: 'Listening' },
-    transcribing: { color: 'bg-zeke-accent', text: 'Transcribing' },
-    thinking: { color: 'bg-zeke-amber', text: 'Thinking' },
+    idle: { color: 'bg-emerald-400', text: 'Ready' },
+    listening: { color: 'bg-zeke-recording', text: 'Listening' },
+    transcribing: { color: 'bg-zeke-accent', text: 'Processing' },
+    thinking: { color: 'bg-zeke-thinking', text: 'Thinking' },
     speaking: { color: 'bg-zeke-accent', text: 'Speaking' },
   }
 

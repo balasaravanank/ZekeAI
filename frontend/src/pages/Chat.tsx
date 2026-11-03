@@ -4,7 +4,6 @@ import { useAudioCapture } from '../hooks/useAudioCapture'
 import { useAudioPlayback } from '../hooks/useAudioPlayback'
 import { VoiceButton } from '../components/VoiceButton'
 import { StatusIndicator } from '../components/StatusIndicator'
-import { AudioVisualizer } from '../components/AudioVisualizer'
 import { ChatMessage } from '../components/ChatMessage'
 import { ConversationSidebar } from '../components/ConversationSidebar'
 import { Settings } from './Settings'
@@ -90,17 +89,17 @@ export function Chat({ token, onLogout }: ChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, pendingAssistant])
 
-  const handleMicPress = useCallback(() => {
-    if (state === 'speaking') {
-      playback.stop()
-      ws.sendInterrupt()
+  const handleMicToggle = useCallback(() => {
+    if (capture.capturing) {
+      capture.stop()
+    } else {
+      if (state === 'speaking') {
+        playback.stop()
+        ws.sendInterrupt()
+      }
+      capture.start()
     }
-    capture.start()
-  }, [state, capture, playback, ws])
-
-  const handleMicRelease = useCallback(() => {
-    capture.stop()
-  }, [capture])
+  }, [capture, state, playback, ws])
 
   const handleTextSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,26 +110,26 @@ export function Chat({ token, onLogout }: ChatProps) {
   }
 
   return (
-    <div className="h-screen bg-zeke-bg flex flex-col">
+    <div className="h-screen bg-zeke-canvas flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-zeke-border shrink-0">
+      <header className="flex items-center justify-between px-4 py-3 bg-zeke-surface border-b border-zeke-border shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-zeke-muted hover:text-zeke-text transition-colors"
+            className="text-zeke-muted hover:text-zeke-text transition-colors p-1"
             aria-label="Open conversations"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-sm font-medium text-zeke-text">Zeke</h1>
+          <h1 className="text-base font-semibold text-zeke-text">Zeke</h1>
           <StatusIndicator state={state} connected={ws.connected} />
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSettingsOpen(true)}
-            className="text-zeke-muted hover:text-zeke-text transition-colors"
+            className="text-zeke-muted hover:text-zeke-text transition-colors p-1"
             aria-label="Settings"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +139,7 @@ export function Chat({ token, onLogout }: ChatProps) {
           </button>
           <button
             onClick={onLogout}
-            className="text-xs text-zeke-muted hover:text-zeke-text transition-colors"
+            className="text-xs text-zeke-muted hover:text-zeke-text transition-colors font-medium"
           >
             Sign out
           </button>
@@ -151,9 +150,11 @@ export function Chat({ token, onLogout }: ChatProps) {
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-2xl mx-auto space-y-3">
           {messages.length === 0 && !pendingAssistant && (
-            <div className="text-center py-20">
-              <p className="text-zeke-muted text-sm">
-                Hold the mic button and speak, or type below.
+            <div className="text-center py-16">
+              <div className="text-4xl mb-4">👋</div>
+              <p className="text-zeke-text font-medium mb-1">Hey, I'm Zeke</p>
+              <p className="text-sm text-zeke-muted">
+                Tap the mic and start talking, or type a message below.
               </p>
             </div>
           )}
@@ -177,32 +178,39 @@ export function Chat({ token, onLogout }: ChatProps) {
         </div>
       </div>
 
-      {/* Input area */}
-      <div className="shrink-0 border-t border-zeke-border px-4 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          {/* Text input */}
-          <form onSubmit={handleTextSubmit} className="flex-1">
-            <input
-              type="text"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Type a message..."
-              className="w-full px-4 py-2.5 rounded-xl bg-zeke-surface border border-zeke-border
-                text-sm text-zeke-text placeholder-zeke-muted-2
-                focus:outline-none focus:border-zeke-accent/30 transition-colors"
-            />
-          </form>
-
-          {/* Visualizer */}
-          <AudioVisualizer state={state} />
-
+      {/* Voice + Input area */}
+      <div className="shrink-0 bg-zeke-surface border-t border-zeke-border px-4 py-5">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-4">
           {/* Mic button */}
           <VoiceButton
             state={state}
             capturing={capture.capturing}
-            onPress={handleMicPress}
-            onRelease={handleMicRelease}
+            onClick={handleMicToggle}
           />
+
+          {/* Text input */}
+          <form onSubmit={handleTextSubmit} className="w-full">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Or type a message..."
+                className="flex-1 px-4 py-2.5 rounded-xl bg-zeke-canvas border border-zeke-border
+                  text-sm text-zeke-text placeholder-zeke-muted
+                  focus:outline-none focus:border-zeke-accent focus:ring-1 focus:ring-zeke-accent transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={!textInput.trim()}
+                className="px-4 py-2.5 rounded-xl bg-zeke-accent text-white text-sm font-medium
+                  hover:bg-zeke-accent/90 transition-colors
+                  disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Send
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 

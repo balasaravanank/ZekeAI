@@ -1,57 +1,112 @@
-import { ConversationState } from '../types/protocol'
+import type { ConversationState } from '../types/protocol'
 
 interface VoiceButtonProps {
   state: ConversationState
   capturing: boolean
-  onPress: () => void
-  onRelease: () => void
+  onClick: () => void
 }
 
-const stateStyles: Record<ConversationState, { ring: string; pulse: boolean; label: string }> = {
-  idle: { ring: 'border-zeke-muted-2', pulse: false, label: 'Hold to speak' },
-  listening: { ring: 'border-zeke-accent', pulse: true, label: 'Listening...' },
-  transcribing: { ring: 'border-zeke-accent', pulse: true, label: 'Processing...' },
-  thinking: { ring: 'border-zeke-amber', pulse: true, label: 'Thinking...' },
-  speaking: { ring: 'border-zeke-accent', pulse: false, label: 'Speaking...' },
-}
+export function VoiceButton({ state, capturing, onClick }: VoiceButtonProps) {
+  const isRecording = capturing || state === 'listening'
+  const isProcessing = state === 'transcribing'
+  const isThinking = state === 'thinking'
+  const isSpeaking = state === 'speaking'
 
-export function VoiceButton({ state, capturing, onPress, onRelease }: VoiceButtonProps) {
-  const { ring, pulse, label } = stateStyles[state]
+  let label = 'Tap to speak'
+  let bgClass = 'bg-white border-2 border-zeke-accent'
+  let iconColor = 'text-zeke-accent'
+
+  if (isRecording) {
+    label = 'Listening... tap to stop'
+    bgClass = 'bg-zeke-recording'
+    iconColor = 'text-white'
+  } else if (isProcessing) {
+    label = 'Processing...'
+    bgClass = 'bg-white border-2 border-zeke-accent'
+    iconColor = 'text-zeke-accent'
+  } else if (isThinking) {
+    label = 'Thinking...'
+    bgClass = 'bg-white border-2 border-zeke-thinking'
+    iconColor = 'text-zeke-thinking'
+  } else if (isSpeaking) {
+    label = 'Speaking... tap to interrupt'
+    bgClass = 'bg-white border-2 border-zeke-accent'
+    iconColor = 'text-zeke-accent'
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <button
-        onMouseDown={onPress}
-        onMouseUp={onRelease}
-        onMouseLeave={onRelease}
-        onTouchStart={(e) => { e.preventDefault(); onPress() }}
-        onTouchEnd={(e) => { e.preventDefault(); onRelease() }}
-        className={`
-          relative w-20 h-20 rounded-full
-          bg-zeke-surface border-2 ${ring}
-          flex items-center justify-center
-          transition-colors duration-300
-          hover:bg-zeke-border active:scale-95
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-zeke-accent focus-visible:ring-offset-2 focus-visible:ring-offset-zeke-bg
-          ${pulse ? 'animate-pulse' : ''}
-        `}
-        aria-label={label}
-      >
-        <svg
-          className={`w-8 h-8 ${capturing ? 'text-zeke-accent' : 'text-zeke-muted'} transition-colors`}
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-        </svg>
-
-        {pulse && (
-          <span className="absolute inset-0 rounded-full border-2 border-zeke-accent animate-ping opacity-20" />
+      <div className="relative">
+        {/* Ripple ring when recording */}
+        {isRecording && (
+          <>
+            <span
+              className="absolute inset-0 rounded-full bg-zeke-recording"
+              style={{ animation: 'ripple 1.5s ease-out infinite' }}
+            />
+            <span
+              className="absolute inset-0 rounded-full bg-zeke-recording"
+              style={{ animation: 'ripple 1.5s ease-out 0.5s infinite' }}
+            />
+          </>
         )}
-      </button>
 
-      <span className="text-xs text-zeke-muted font-light tracking-wide">
+        {/* Thinking glow */}
+        {isThinking && (
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{ animation: 'pulse-glow 2s ease-in-out infinite' }}
+          />
+        )}
+
+        {/* Processing spinner */}
+        {isProcessing && (
+          <span
+            className="absolute -inset-1 rounded-full border-2 border-transparent border-t-zeke-accent"
+            style={{ animation: 'spin-border 0.8s linear infinite' }}
+          />
+        )}
+
+        <button
+          onClick={onClick}
+          className={`
+            relative w-[72px] h-[72px] rounded-full
+            ${bgClass}
+            flex items-center justify-center
+            transition-all duration-200
+            shadow-sm hover:shadow-md active:scale-95
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-zeke-accent focus-visible:ring-offset-2
+          `}
+          aria-label={label}
+        >
+          {isSpeaking ? (
+            <div className="flex items-center gap-[3px]">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-[3px] rounded-full bg-zeke-accent"
+                  style={{
+                    height: '20px',
+                    animation: `bar-bounce 0.6s ease-in-out ${i * 0.1}s infinite`,
+                    transformOrigin: 'center',
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <svg
+              className={`w-7 h-7 ${iconColor} transition-colors`}
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      <span className="text-xs text-zeke-muted font-medium tracking-wide">
         {label}
       </span>
     </div>
