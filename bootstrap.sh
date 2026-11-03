@@ -61,7 +61,7 @@ cd "$ZEKE_HOME/frontend"
 if [ ! -d "node_modules" ]; then
     npm install --silent
 fi
-npx tsc -b && npx vite build
+npx vite build
 cd "$ZEKE_HOME"
 echo "  Done."
 
