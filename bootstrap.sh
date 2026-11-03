@@ -15,21 +15,31 @@ echo "  Zeke AI Bootstrap"
 echo "=========================================="
 echo ""
 
+# Detect sudo
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo &> /dev/null; then
+        SUDO="sudo"
+    else
+        echo "WARNING: Not root and sudo not available. System package install may fail."
+    fi
+fi
+
 # --- 1. System dependencies ---
 echo "[1/7] Installing system dependencies..."
-apt-get update -qq
-apt-get install -y --no-install-recommends \
+$SUDO apt-get update -qq 2>/dev/null || true
+$SUDO apt-get install -y --no-install-recommends \
     build-essential cmake git curl wget \
     python3 python3-pip python3-venv python3-dev \
     ffmpeg espeak-ng \
-    > /dev/null 2>&1
+    > /dev/null 2>&1 || echo "  WARNING: Some packages may not have installed. Continuing..."
 echo "  Done."
 
 # --- 2. Node.js (for frontend build) ---
 if ! command -v node &> /dev/null; then
     echo "[2/7] Installing Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
-    apt-get install -y --no-install-recommends nodejs > /dev/null 2>&1
+    curl -fsSL https://deb.nodesource.com/setup_20.x | $SUDO bash - > /dev/null 2>&1
+    $SUDO apt-get install -y --no-install-recommends nodejs > /dev/null 2>&1
 else
     echo "[2/7] Node.js already installed."
 fi
