@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 # =============================================================================
 # Zeke AI Startup Script
@@ -9,7 +9,7 @@ set -euo pipefail
 ZEKE_HOME="${ZEKE_BASE_DIR:-$HOME/zeke-ai}"
 cd "$ZEKE_HOME"
 
-# Load environment
+# Load environment (without nounset — .env values may contain $)
 if [ -f .env ]; then
     set -a
     source .env
