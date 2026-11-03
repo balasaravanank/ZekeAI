@@ -1,0 +1,37 @@
+# Environment
+.env
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Models (downloaded at bootstrap, too large for git)
+models/*.bin
+models/*.gguf
+models/*.onnx
+models/*.onnx.json
+
+# Data (runtime SQLite, backed up separately)
+data/*.db
+data/backup/
+
+# llama.cpp binary (built at bootstrap)
+llama-server
+
+# IDE / tools
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
