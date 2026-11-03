@@ -22,8 +22,10 @@ models/*.onnx.json
 data/*.db
 data/backup/
 
-# llama.cpp binary (built at bootstrap)
+# Binaries (built/downloaded at bootstrap)
 llama-server
+whisper-cli
+piper/
 
 # IDE / tools
 .claude/

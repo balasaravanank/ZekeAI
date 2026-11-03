@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-import struct
+import subprocess
 import tempfile
 import wave
 from pathlib import Path
@@ -10,26 +10,10 @@ from backend.config.settings import settings
 
 log = logging.getLogger(__name__)
 
-_model = None
-
-
-def _get_model():
-    global _model
-    if _model is None:
-        from pywhispercpp.model import Model
-
-        model_path = str(settings.whisper_model_path)
-        log.info("Loading whisper model: %s", model_path)
-        _model = Model(model_path, n_threads=2, print_progress=False, print_realtime=False)
-        log.info("Whisper model loaded")
-    return _model
-
 
 def transcribe(pcm_bytes: bytes, sample_rate: int = 16000) -> str:
-    model = _get_model()
-
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        tmp_path = f.name
+        tmp_wav = f.name
         with wave.open(f, "wb") as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
@@ -37,18 +21,40 @@ def transcribe(pcm_bytes: bytes, sample_rate: int = 16000) -> str:
             wf.writeframes(pcm_bytes)
 
     try:
-        segments = model.transcribe(tmp_path)
-        text = " ".join(seg.text.strip() for seg in segments if seg.text.strip())
-        return text
+        result = subprocess.run(
+            [
+                str(settings.whisper_binary_path),
+                "-m", str(settings.whisper_model_path),
+                "-f", tmp_wav,
+                "--no-prints",
+                "--no-timestamps",
+                "-otxt",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        txt_path = tmp_wav + ".txt"
+        if Path(txt_path).exists():
+            text = Path(txt_path).read_text().strip()
+            Path(txt_path).unlink(missing_ok=True)
+            return text
+
+        if result.stdout.strip():
+            return result.stdout.strip()
+
+        if result.returncode != 0:
+            log.error("whisper-cli failed: %s", result.stderr)
+
+        return ""
     finally:
-        Path(tmp_path).unlink(missing_ok=True)
+        Path(tmp_wav).unlink(missing_ok=True)
 
 
 def is_loaded() -> bool:
-    return _model is not None
+    return settings.whisper_binary_path.exists()
 
 
 def unload() -> None:
-    global _model
-    _model = None
-    log.info("Whisper model unloaded")
+    pass

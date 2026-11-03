@@ -1,66 +1,37 @@
 from __future__ import annotations
 
-import io
 import logging
-import struct
-import wave
+import subprocess
 
 from backend.config.settings import settings
 
 log = logging.getLogger(__name__)
 
-_voice = None
-
-
-def _get_voice():
-    global _voice
-    if _voice is None:
-        from piper import PiperVoice
-
-        model_path = str(settings.piper_model_path)
-        config_path = model_path + ".json"
-        log.info("Loading Piper voice: %s", model_path)
-        _voice = PiperVoice.load(model_path, config_path=config_path, use_cuda=False)
-        log.info("Piper voice loaded")
-    return _voice
-
 
 def synthesize(text: str) -> bytes:
-    voice = _get_voice()
+    result = subprocess.run(
+        [
+            str(settings.piper_binary_path),
+            "--model", str(settings.piper_model_path),
+            "--config", str(settings.piper_model_path) + ".json",
+            "--output_raw",
+        ],
+        input=text,
+        capture_output=True,
+        text=False,
+        timeout=30,
+    )
 
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(settings.tts_sample_rate)
-        voice.synthesize(text, wf)
+    if result.returncode != 0:
+        log.error("Piper TTS failed: %s", result.stderr.decode(errors="replace"))
+        return b""
 
-    buf.seek(0)
-    with wave.open(buf, "rb") as wf:
-        pcm_data = wf.readframes(wf.getnframes())
-
-    return pcm_data
-
-
-def synthesize_raw(text: str) -> bytes:
-    voice = _get_voice()
-
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(settings.tts_sample_rate)
-        voice.synthesize(text, wf)
-
-    buf.seek(0)
-    return buf.getvalue()
+    return result.stdout
 
 
 def is_loaded() -> bool:
-    return _voice is not None
+    return settings.piper_binary_path.exists()
 
 
 def unload() -> None:
-    global _voice
-    _voice = None
-    log.info("Piper voice unloaded")
+    pass

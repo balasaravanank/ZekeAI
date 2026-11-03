@@ -71,6 +71,14 @@ class Settings(BaseSettings):
         return self.models_dir / f"{self.piper_voice}.onnx"
 
     @property
+    def piper_binary_path(self) -> Path:
+        return self.base_dir / "piper" / "piper"
+
+    @property
+    def whisper_binary_path(self) -> Path:
+        return self.base_dir / "whisper-cli"
+
+    @property
     def llm_base_url(self) -> str:
         return f"http://{self.llm_host}:{self.llm_port}"
 

@@ -105,8 +105,8 @@ PID4=$!
 wait $PID1 $PID2 $PID3 $PID4
 echo "  All models downloaded."
 
-# --- 6. Build llama.cpp server ---
-echo "[6/7] Building llama.cpp server..."
+# --- 6a. Build llama.cpp server ---
+echo "[6/8] Building llama.cpp server..."
 if [ -f "$ZEKE_HOME/llama-server" ]; then
     echo "  llama-server already built, skipping."
 else
@@ -122,8 +122,39 @@ else
     echo "  llama-server built successfully."
 fi
 
-# --- 7. Restore data from backup ---
-echo "[7/7] Checking for data backup..."
+# --- 6b. Build whisper.cpp ---
+echo "[7/8] Building whisper.cpp..."
+if [ -f "$ZEKE_HOME/whisper-cli" ]; then
+    echo "  whisper-cli already built, skipping."
+else
+    WHISPER_TMP="/tmp/whisper.cpp"
+    if [ ! -d "$WHISPER_TMP" ]; then
+        git clone --depth 1 https://github.com/ggerganov/whisper.cpp.git "$WHISPER_TMP"
+    fi
+    cd "$WHISPER_TMP"
+    cmake -B build -DCMAKE_BUILD_TYPE=Release > /dev/null 2>&1
+    cmake --build build --target whisper-cli -j$(nproc) > /dev/null 2>&1
+    cp build/bin/whisper-cli "$ZEKE_HOME/whisper-cli"
+    cd "$ZEKE_HOME"
+    echo "  whisper-cli built successfully."
+fi
+
+# --- 6c. Download Piper TTS binary ---
+echo "       Downloading Piper TTS..."
+if [ -f "$ZEKE_HOME/piper/piper" ]; then
+    echo "  Piper already downloaded, skipping."
+else
+    PIPER_VERSION="2023.11.14-2"
+    PIPER_URL="https://github.com/rhasspy/piper/releases/download/${PIPER_VERSION}/piper_linux_x86_64.tar.gz"
+    wget -q --show-progress -O /tmp/piper.tar.gz "$PIPER_URL"
+    tar -xzf /tmp/piper.tar.gz -C "$ZEKE_HOME"
+    chmod +x "$ZEKE_HOME/piper/piper"
+    rm -f /tmp/piper.tar.gz
+    echo "  Piper downloaded successfully."
+fi
+
+# --- 8. Restore data from backup ---
+echo "[8/8] Checking for data backup..."
 mkdir -p "$DATA_DIR"
 if [ -n "${ZEKE_GITHUB_TOKEN:-}" ] && [ -n "${ZEKE_BACKUP_REPO:-}" ]; then
     BACKUP_REPO_DIR="/tmp/zeke-backup"
