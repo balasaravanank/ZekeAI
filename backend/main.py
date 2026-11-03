@@ -81,6 +81,15 @@ app.add_middleware(
 app.include_router(api_router)
 app.include_router(ws_router)
 
-frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+frontend_dist = settings.base_dir / "frontend" / "dist"
 if frontend_dist.exists():
-    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+    from fastapi.responses import FileResponse
+
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+
+    @app.get("/{path:path}")
+    async def serve_frontend(path: str):
+        file_path = frontend_dist / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(frontend_dist / "index.html"))
