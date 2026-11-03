@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import struct
 import logging
+import math
 
 from backend.config.settings import settings
 
@@ -9,13 +10,15 @@ log = logging.getLogger(__name__)
 
 
 class VoiceActivityDetector:
+    """Energy-based voice activity detector. No external dependencies."""
+
     FRAME_DURATION_MS = 30
-    FRAME_SIZE = settings.stt_sample_rate * FRAME_DURATION_MS // 1000  # samples per frame
+    FRAME_SIZE = settings.stt_sample_rate * FRAME_DURATION_MS // 1000
+
+    # RMS energy threshold for speech detection (int16 scale)
+    ENERGY_THRESHOLD = 500
 
     def __init__(self) -> None:
-        import webrtcvad
-
-        self._vad = webrtcvad.Vad(settings.vad_aggressiveness)
         self._speech_started = False
         self._silence_frames = 0
         self._speech_buffer = bytearray()
@@ -26,22 +29,26 @@ class VoiceActivityDetector:
         self._silence_frames = 0
         self._speech_buffer = bytearray()
 
-    def process_chunk(self, pcm_bytes: bytes) -> tuple[bool, bytes | None]:
-        """Process a chunk of PCM audio.
+    def _rms_energy(self, frame: bytes) -> float:
+        n_samples = len(frame) // 2
+        if n_samples == 0:
+            return 0.0
+        samples = struct.unpack(f"<{n_samples}h", frame)
+        sum_sq = sum(s * s for s in samples)
+        return math.sqrt(sum_sq / n_samples)
 
-        Returns (speech_ended, audio_bytes).
-        When speech_ended is True, audio_bytes contains the complete speech segment.
-        """
+    def process_chunk(self, pcm_bytes: bytes) -> tuple[bool, bytes | None]:
         self._speech_buffer.extend(pcm_bytes)
 
-        frame_bytes = self.FRAME_SIZE * 2  # 2 bytes per sample (s16le)
+        frame_bytes = self.FRAME_SIZE * 2
         offset = len(self._speech_buffer) - len(pcm_bytes)
         if offset < 0:
             offset = 0
 
         while offset + frame_bytes <= len(self._speech_buffer):
             frame = bytes(self._speech_buffer[offset:offset + frame_bytes])
-            is_speech = self._vad.is_speech(frame, settings.stt_sample_rate)
+            energy = self._rms_energy(frame)
+            is_speech = energy > self.ENERGY_THRESHOLD
 
             if is_speech:
                 self._speech_started = True

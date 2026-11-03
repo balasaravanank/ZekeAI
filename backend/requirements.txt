@@ -6,6 +6,5 @@ pydantic==2.10.4
 pydantic-settings==2.7.1
 python-jose[cryptography]==3.3.0
 bcrypt==4.2.1
-webrtcvad==2.0.10
 aiosqlite==0.20.0
 python-multipart==0.0.20
