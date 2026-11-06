@@ -69,4 +69,5 @@ export interface UserSettings {
   tts_voice: string
   llm_temperature: number
   llm_max_tokens: number
+  auto_listen: boolean
 }

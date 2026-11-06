@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
     tts_voice TEXT DEFAULT 'en_US-lessac-medium',
     llm_temperature REAL DEFAULT 0.7,
     llm_max_tokens INTEGER DEFAULT 256,
+    auto_listen INTEGER DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -59,6 +60,10 @@ async def get_db() -> aiosqlite.Connection:
         await _db.execute("PRAGMA journal_mode=WAL")
         await _db.execute("PRAGMA foreign_keys=ON")
         await _db.executescript(SCHEMA)
+        try:
+            await _db.execute("ALTER TABLE user_settings ADD COLUMN auto_listen INTEGER DEFAULT 1")
+        except Exception:
+            pass
         await _db.commit()
     return _db
 

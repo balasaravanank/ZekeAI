@@ -145,7 +145,7 @@ class ConversationOrchestrator:
                         audio_data = await asyncio.to_thread(
                             tts.synthesize, sentence_text
                         )
-                        if not self._cancelled:
+                        if not self._cancelled and audio_data:
                             await self._send_bytes(audio_data)
                     except Exception:
                         log.exception("TTS failed for sentence %d", sentence_index)
@@ -160,7 +160,7 @@ class ConversationOrchestrator:
             )
             try:
                 audio_data = await asyncio.to_thread(tts.synthesize, remaining)
-                if not self._cancelled:
+                if not self._cancelled and audio_data:
                     await self._send_bytes(audio_data)
             except Exception:
                 log.exception("TTS failed for final sentence")

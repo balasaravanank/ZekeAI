@@ -6,7 +6,8 @@ import { StatusIndicator } from '../components/StatusIndicator'
 import { ChatMessage } from '../components/ChatMessage'
 import { ConversationSidebar } from '../components/ConversationSidebar'
 import { Settings } from './Settings'
-import type { ChatMessage as ChatMessageType, ConversationState } from '../types/protocol'
+import { api } from '../lib/api'
+import type { ChatMessage as ChatMessageType, ConversationState, UserSettings } from '../types/protocol'
 
 interface ChatProps {
   token: string
@@ -30,12 +31,44 @@ export function Chat({ token, onLogout }: ChatProps) {
   const [recordingTime, setRecordingTime] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setInterval>>()
+  const turnEndedRef = useRef(false)
+  const autoListenRef = useRef(true)
+  const capturingRef = useRef(false)
+  const stateRef = useRef<ConversationState>('idle')
 
-  const playback = useAudioPlayback()
+  useEffect(() => {
+    api.getSettings().then((data) => {
+      const s = data as unknown as UserSettings
+      autoListenRef.current = s.auto_listen ?? true
+    }).catch(() => {})
+  }, [])
+
+  const tryAutoListen = useCallback(() => {
+    if (!autoListenRef.current || capturingRef.current) return
+    if (stateRef.current !== 'idle') return
+    turnEndedRef.current = false
+    setTimeout(() => {
+      if (stateRef.current === 'idle' && !capturingRef.current) {
+        captureRef.current?.start()
+      }
+    }, 300)
+  }, [])
+
+  const handlePlaybackEnd = useCallback(() => {
+    if (turnEndedRef.current) {
+      tryAutoListen()
+    }
+  }, [tryAutoListen])
+
+  const playback = useAudioPlayback({ onPlaybackEnd: handlePlaybackEnd })
+  const captureRef = useRef<{ start: () => void; stop: () => void; capturing: boolean } | null>(null)
 
   const ws = useWebSocket({
     token,
-    onStatusChange: setState,
+    onStatusChange: (s) => {
+      setState(s)
+      stateRef.current = s
+    },
     onUserText: (text) => {
       setMessages((prev) => [
         ...prev,
@@ -66,6 +99,10 @@ export function Chat({ token, onLogout }: ChatProps) {
         }
         return ''
       })
+      turnEndedRef.current = true
+      if (!playback.isPlaying()) {
+        tryAutoListen()
+      }
     },
     onAudioChunk: (data) => {
       playback.enqueue(data)
@@ -77,6 +114,7 @@ export function Chat({ token, onLogout }: ChatProps) {
       setConversationId(id)
       setMessages([])
       setPendingAssistant('')
+      turnEndedRef.current = false
     },
   })
 
@@ -85,16 +123,22 @@ export function Chat({ token, onLogout }: ChatProps) {
       ws.sendBinary(data)
     },
     onStart: () => {
+      capturingRef.current = true
       ws.sendAudioStart()
       setRecordingTime(0)
       timerRef.current = setInterval(() => setRecordingTime((t) => t + 1), 1000)
     },
     onStop: () => {
+      capturingRef.current = false
       ws.sendAudioEnd()
       clearInterval(timerRef.current)
       setRecordingTime(0)
     },
   })
+
+  useEffect(() => {
+    captureRef.current = capture
+  }, [capture])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -108,6 +152,7 @@ export function Chat({ token, onLogout }: ChatProps) {
     if (capture.capturing) {
       capture.stop()
     } else if (state === 'speaking') {
+      turnEndedRef.current = false
       playback.stop()
       ws.sendInterrupt()
     } else if (state === 'idle') {
@@ -300,7 +345,13 @@ export function Chat({ token, onLogout }: ChatProps) {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
-      <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <Settings open={settingsOpen} onClose={() => {
+        setSettingsOpen(false)
+        api.getSettings().then((data) => {
+          const s = data as unknown as UserSettings
+          autoListenRef.current = s.auto_listen ?? true
+        }).catch(() => {})
+      }} />
     </div>
   )
 }

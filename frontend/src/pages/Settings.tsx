@@ -14,6 +14,7 @@ export function Settings({ open, onClose }: SettingsProps) {
     tts_voice: 'en_US-lessac-medium',
     llm_temperature: 0.7,
     llm_max_tokens: 256,
+    auto_listen: true,
   })
   const [memories, setMemories] = useState<Memory[]>([])
   const [saving, setSaving] = useState(false)
@@ -75,6 +76,16 @@ export function Settings({ open, onClose }: SettingsProps) {
                   type="checkbox"
                   checked={settings.tts_enabled}
                   onChange={(e) => setSettings({ ...settings, tts_enabled: e.target.checked })}
+                  className="accent-zeke-accent w-4 h-4"
+                />
+              </label>
+
+              <label className="flex items-center justify-between">
+                <span className="text-sm text-zeke-text">Auto-listen after response</span>
+                <input
+                  type="checkbox"
+                  checked={settings.auto_listen}
+                  onChange={(e) => setSettings({ ...settings, auto_listen: e.target.checked })}
                   className="accent-zeke-accent w-4 h-4"
                 />
               </label>

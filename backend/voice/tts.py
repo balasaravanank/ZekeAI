@@ -16,7 +16,7 @@ def synthesize(text: str) -> bytes:
             "--config", str(settings.piper_model_path) + ".json",
             "--output_raw",
         ],
-        input=text,
+        input=text.encode("utf-8"),
         capture_output=True,
         text=False,
         timeout=30,

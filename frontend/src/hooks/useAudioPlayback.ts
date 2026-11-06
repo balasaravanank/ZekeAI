@@ -1,10 +1,18 @@
 import { useRef, useCallback } from 'react'
 
-export function useAudioPlayback(sampleRate = 22050) {
+interface UseAudioPlaybackOptions {
+  sampleRate?: number
+  onPlaybackEnd?: () => void
+}
+
+export function useAudioPlayback(options: UseAudioPlaybackOptions = {}) {
+  const { sampleRate = 22050 } = options
   const contextRef = useRef<AudioContext | null>(null)
   const queueRef = useRef<AudioBuffer[]>([])
   const playingRef = useRef(false)
   const nextTimeRef = useRef(0)
+  const onPlaybackEndRef = useRef(options.onPlaybackEnd)
+  onPlaybackEndRef.current = options.onPlaybackEnd
 
   const getContext = useCallback(() => {
     if (!contextRef.current || contextRef.current.state === 'closed') {
@@ -35,6 +43,13 @@ export function useAudioPlayback(sampleRate = 22050) {
       source.connect(ctx.destination)
       source.start(startTime)
       nextTimeRef.current = startTime + buffer.duration
+
+      source.onended = () => {
+        const c = contextRef.current
+        if (c && c.currentTime >= nextTimeRef.current - 0.05) {
+          onPlaybackEndRef.current?.()
+        }
+      }
     },
     [getContext, sampleRate]
   )
